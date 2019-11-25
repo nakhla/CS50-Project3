@@ -1,0 +1,45 @@
+{% extends "orders/base.html" %}
+
+{% block content%}
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th class="text-center" scope="col">Status</th>
+                    <th scope="col">Date Added</th>
+                    <th>Total</th>
+                    <th class="text-center">View Order Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders|dictsortreversed:"id" %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    {% if order.status == "P" %}
+                    <td class="bg-warning text-center"><strong>{{order.get_status_display}}</strong></td>
+                    {% elif order.status == "C" %}
+                    <td class="bg-success text-center"><strong>{{order.get_status_display}}</strong></td>
+                    {% elif order.status == "N" %}
+                    <td class="bg-danger text-center"><strong>{{order.get_status_display}}</strong></td>
+                    {% elif order.status == "R" %}
+                    <td class="bg-primary text-center"><strong>{{order.get_status_display}}</strong></td>
+                    {% endif %}
+                    <td>{{ order.created }}</td>
+                    <td class="currency">{{ order.total_price }}</td>
+                    <td class="text-center"><a class="btn btn-primary" href="{% url 'myOrderItems' order.id %}">View <i class="far fa-eye"></i></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

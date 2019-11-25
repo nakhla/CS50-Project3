@@ -1,0 +1,53 @@
+{% extends "orders/base.html" %}
+
+{% block content%}
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+        <h2>Order No. {{orderitems.first.orderID_id}}</h2>
+        <div class="card mb-4">
+                <h5 class="card-header">Customer details:</h5>
+                <div class="card-body">
+                    <div class="row">
+                            <div class="col-lg-6"><p class="card-text"><strong>Name: </strong>{{ order.first.user}}</p></div>
+                            <div class="col-lg-6"><p class="card-text"><strong>Status: </strong>{{order.get.get_status_display}}</div>
+                            <div class="col-lg-6"><p class="card-text"><strong>Email: </strong>{{ order.first.user.email}}</p></div>
+                            <div class="col-lg-6"><p class="card-text"><strong>Submitted: </strong>{{ order.first.created}}</p></div>
+                    </div>
+                </div>
+         </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in orderitems %}
+                <tr>
+                    
+                    <th scope="row">{{ item.item_description }}</th>
+                    <td><strong>{{item.quantity}}</strong></td>
+                    <td class="currency">{{item.price}}</td>
+                    <td class="currency">{{item.total_price}}</td>
+                    
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3">Total</td>
+                    <td class="currency"><strong>{{order.first.total_price}}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+       
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

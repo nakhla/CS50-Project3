@@ -1,0 +1,58 @@
+{% extends "orders/base.html" %}
+
+{% block content%}
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+     {% if cart.cart|length > 0 %}
+        <form action="{% url 'cart_actions' %}" method="POST">
+            {% csrf_token %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart %}
+                    <tr>
+                        <td><input type="checkbox" class="btn btn-primary" name="DeletedID" value="{{item.id}}"></input></td>
+                        <th scope="row">{{ item.item }}</th>
+                        <td><strong>{{item.quantity}}</strong></td>
+                        <td class="currency">{{item.price}}</td>
+                        <td class="currency">{{item.total_price}}</td>
+                        
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td></td>
+                        <td colspan="3">Total</td>
+                        
+                        
+                        <th  class="currency">{{cart_total_price}}</th>             
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <th scope="row"></th>
+                        <td ><button type="Remove" class="btn btn-danger" name="Bulk_Remove"><i class="far fa-trash-alt"></i> Remove</button></td>
+                        
+                        <td><button type="submit" class="btn btn-success" name="Submit_Order"><i class="far fa-check-square"></i> Submit Order</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        {% else %}
+        <h1 class="text-center pt-4">Your cart is empty</h1>
+        {% endif %}
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

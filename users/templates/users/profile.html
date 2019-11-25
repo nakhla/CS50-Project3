@@ -1,0 +1,33 @@
+{% extends "orders/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="col-lg-3">
+
+</div>
+<div class="col-lg-6">
+
+    <div class="reg_form border border-warning text-center">
+      <img src="media/{{user.profile.image}}" class="rounded-circle">
+      <h2 class="border-warning border-bottom mb-2 pb-2 ">{{ user.username }}</h2>
+      Email: {{ user.email }}
+    </div>
+    <div>
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <fieldset class="form-group">
+            {{ u_form|crispy }}
+            {{ p_form|crispy }}
+          </fieldset>
+          <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary">Update</button>
+          </div>
+        </form>
+    </div>
+
+</div>
+<div class="col-lg-3">
+
+</div>
+
+
+{% endblock content %}

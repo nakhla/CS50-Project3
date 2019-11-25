@@ -1,0 +1,371 @@
+{% extends "orders/base.html" %}
+
+{% block content%}
+<script >
+$( document ).ready(function() {
+    $(".checkbox-menu").on("change", "input[type='checkbox']", function() {
+        let toppingLimit = parseInt($(this).attr("ToppingLimit"));
+        let FilterByclass = $(this).attr("FilterByclass");
+         if($('.' + FilterByclass + ':checked').length > toppingLimit) {
+              this.checked = false;
+          }else{
+            $(this).closest("li").toggleClass("active", this.checked);
+          }
+    });
+
+    $(document).on('click', '.allow-focus', function (e) {
+      e.stopPropagation();
+    });
+
+    $('.RD_Size').on('change', function () {
+        $('#' + this.name ).val($(this).val());
+    });
+
+    // Select all tabs
+    $('.nav-tabs a').click(function(){
+      var lastSelectedTab = $(this).attr('id');
+      //alert(lastSelectedTab)
+      localStorage.setItem('lastSelectedTab' , lastSelectedTab)
+    })
+
+    if (localStorage.getItem('lastSelectedTab')){
+      $('.nav-tabs #' + localStorage.getItem('lastSelectedTab')).tab('show')
+      //$('.nav-tabs a[href="' + localStorage.getItem('lastSelectedTab') + '"]').tab('show')
+    }
+    
+    /*
+   $('.ToppingCheckBox').on('change', function () {
+        let toppingLimit = parseInt($(this).attr("ToppingLimit"));
+        if($(this).siblings(':checked').length >= toppingLimit) {
+            this.checked = false;
+        }
+    });*/
+});
+
+function validateToppingsCheckedCount(obj, checkBoxesClassName){
+    let toppingLimit = parseInt($(obj).attr("ToppingLimit"));
+    if($('.' + checkBoxesClassName + ':checked').length < toppingLimit) {
+        alert('Toppings selected is less than ' + toppingLimit); //TODO: Use another Javascript alert
+        return false;
+    }
+    return true;
+}
+</script>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+
+      <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+          <a class="nav-item nav-link active" id="nav-Regual-tab" data-toggle="tab" href="#nav-Regular" role="tab" aria-controls="nav-Regular" aria-selected="true">Regular Pizza</a>
+          <a class="nav-item nav-link" id="nav-Sicilian-tab" data-toggle="tab" href="#nav-Sicilian" role="tab" aria-controls="nav-Sicilian" aria-selected="false">Sicilian Pizza</a>
+          <a class="nav-item nav-link" id="nav-Sub-tab" data-toggle="tab" href="#nav-Sub" role="tab" aria-controls="nav-Sub" aria-selected="false">Subs</a>
+          <a class="nav-item nav-link" id="nav-DinnerPlatter-tab" data-toggle="tab" href="#nav-DinnerPlatter" role="tab" aria-controls="nav-DinnerPlatter" aria-selected="false">Dinner Platters</a>
+          <a class="nav-item nav-link" id="nav-Pasta-tab" data-toggle="tab" href="#nav-Pasta" role="tab" aria-controls="nav-Pasta" aria-selected="false">Pasta</a>
+          <a class="nav-item nav-link" id="nav-Salad-tab" data-toggle="tab" href="#nav-Salad" role="tab" aria-controls="nav-Salad" aria-selected="false">Salad</a>
+        </div>
+      </nav>
+      <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-Regular" role="tabpanel" aria-labelledby="nav-Regular-tab">
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Quantity</th>
+                <th colspan="2"  bgcolor="#F8F9FA">Regular Pizza</th>
+                <th>Choose Topping</th>
+                <th class="text-center" scope="col">Small</th>
+                <th class="text-center" scope="col">Large</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in RegularPizza %}
+              <tr>
+                <form action="{% url 'cart_add' %}" method="POST">
+                  {% csrf_token %}
+                  <input type="hidden" name="item_cat" value="RegularPizza">
+                  <input type="hidden" name="item_id" value="{{item.id}}">
+                  <td><input type="number" name="quantity" min="1" max="9" value="1"></td>
+                  <th scope="row"><img src="media/{{item.image}}" width="50" height="50"></th>
+                  <td>{{item.name}}</td>
+                  
+                    
+                  <td>
+                    {% if item.toppings_limit > 0 %}
+                    <div class="dropdown">
+                          <button class="btn btn-default dropdown-toggle" type="button" 
+                                  id="dropdownMenu1" data-toggle="dropdown" 
+                                  aria-haspopup="true" aria-expanded="true">
+                                  <i class="fas fa-cog"></i>
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1">
+                              {% for topping in PizzaTopping %}
+                              <li >
+                                <label>
+                                  <input type="checkbox" value="{{topping}}" name="toppings" class="chk_RP_{{item.id}} ToppingCheckBox" FilterByclass="chk_RP_{{item.id}}"  ToppingLimit="{{item.toppings_limit}}"> {{topping}}
+                                </label>
+                              </li>
+                              {% endfor %} 
+                          </ul>
+                      </div>
+                      {% endif %}
+                    </td>
+                  <td class="currency text-center">
+                    {{item.price_s}}<br>
+                    <input class="form-check-input RD_Size" type="radio" name="rd_size_RP_{{item.id}}" id="gridRadios1" value="Small" checked>
+                  </td>
+                  <td class="currency text-center">{{item.price_l}}<br>
+                      <input type="hidden" name="size" value="Small" id="rd_size_RP_{{item.id}}">
+                      <input class="form-check-input RD_Size" type="radio" name="rd_size_RP_{{item.id}}" id="gridRadios2" value="Large">
+                  </td>
+                  <td><button type="submit" class="btn btn-primary" ToppingLimit="{{item.toppings_limit}}" onclick="return validateToppingsCheckedCount( this, 'chk_RP_{{item.id}}');" >Add to <i class="fas fa-shopping-cart"></i></button></td>
+                </form>
+              </tr>
+              
+              {% endfor %}
+            </tbody>
+          </table>
+
+
+        </div>
+        <div class="tab-pane fade" id="nav-Sicilian" role="tabpanel" aria-labelledby="nav-Sicilian-tab">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Quantity</th>
+                <th colspan="2"  bgcolor="#F8F9FA">Sicilian Pizza</th>
+                <th>Choose Topping</th>
+                <th class="text-center" scope="col">Small</th>
+                <th class="text-center" scope="col">Large</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in SicilianPizza %}
+              <tr>
+                <form action="{% url 'cart_add' %}" method="POST">
+                  {% csrf_token %}
+                  <input type="hidden" name="item_cat" value="SicilianPizza">
+                  <input type="hidden" name="item_id" value="{{item.id}}">
+                  <td><input type="number" name="quantity" min="1" max="9" value="1"></td>
+                  <th scope="row"><img src="media/{{item.image}}" width="50" height="50"></th>
+                  <td>{{item.name}}</td>
+
+
+                  <td>
+                      {% if item.toppings_limit > 0 %}
+                      <div class="dropdown">
+                          <button class="btn btn-default dropdown-toggle" type="button" 
+                                  id="dropdownMenu1" data-toggle="dropdown" 
+                                  aria-haspopup="true" aria-expanded="true">
+                                  <i class="fas fa-cog"></i>
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1">
+                          {% for topping in PizzaTopping %}
+                            <li >
+                              <label>
+                                <input type="checkbox" value="{{topping}}" name="toppings" class="chk_SP_{{item.id}} ToppingCheckBox" FilterByclass="chk_SP_{{item.id}}"  ToppingLimit="{{item.toppings_limit}}"> {{topping}}
+                              </label>
+                            </li>
+                          {% endfor %} 
+          
+                            
+                          </ul>
+                        </div>
+                     {% endif %}
+                  </td>
+                  <td class="currency text-center">{{item.price_s}}
+                      <br>
+                      <input class="form-check-input RD_Size" type="radio" name="rd_size_SP_{{item.id}}" id="gridRadios1" value="Small" checked>
+                  </td>
+                  <td class="currency text-center">{{item.price_l}}
+                      <br>
+                      <input type="hidden" name="size" value="Small" id="rd_size_SP_{{item.id}}">
+                      <input class="form-check-input RD_Size" type="radio" name="rd_size_SP_{{item.id}}" id="gridRadios2" value="Large">
+                  </td>
+                  <td><button type="submit" class="btn btn-primary" ToppingLimit="{{item.toppings_limit}}" onclick="return validateToppingsCheckedCount( this, 'chk_SP_{{item.id}}');" >Add to <i class="fas fa-shopping-cart"></i></button></td>
+                </form>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+        </div>
+
+        <div class="tab-pane fade" id="nav-Sub" role="tabpanel" aria-labelledby="nav-Sub-tab">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Quantity</th>
+                <th colspan="2"  bgcolor="#F8F9FA">Subs</th>
+                <th>Choose Topping</th>
+                <th class="text-center" scope="col">Small</th>
+                <th class="text-center" scope="col">Large</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in Sub %}
+              <tr>
+                <form action="{% url 'cart_add' %}" method="POST">
+                  {% csrf_token %}
+                  <input type="hidden" name="item_cat" value="Sub">
+                  <input type="hidden" name="item_id" value="{{item.id}}">
+                  <td><input type="number" name="quantity" min="1" max="9" value="1"></td>
+                  <th scope="row"><img src="media/{{item.image}}" width="50" height="50"></th>
+                  <td>{{item.name}}</td>
+
+
+                  <td>
+                      <div class="dropdown">
+                          <button class="btn btn-default dropdown-toggle" type="button" 
+                                  id="dropdownMenu1" data-toggle="dropdown" 
+                                  aria-haspopup="true" aria-expanded="true">
+                                  <i class="fas fa-cog"></i>
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu checkbox-menu allow-focus" aria-labelledby="dropdownMenu1">
+                          {% for topping in item.topping.all %}
+                            <li >
+                              <label>
+                                <input type="checkbox" value="{{topping.id}}" name="toppings"> <strong>{{topping}}</strong><div class="d-flex justify-content-end"><div class="p-2 bd-highlight">${{topping.price_s}} for Small | ${{topping.price_l}} for Large</div></div> 
+                              </label>
+                            </li>
+                          {% endfor %} 
+          
+                            
+                          </ul>
+                        </div>
+                  </td>
+                  <td class="currency text-center">{{item.price_s}}
+                      <br>
+                      <input class="form-check-input RD_Size" type="radio" name="rd_size_S_{{item.id}}" id="gridRadios1" value="Small" checked>
+                  </td>
+                  <td class="currency text-center">{{item.price_l}}
+                      <br>
+                      <input type="hidden" name="size" value="Small" id="rd_size_S_{{item.id}}">
+                      <input class="form-check-input RD_Size" type="radio" name="rd_size_S_{{item.id}}" id="gridRadios2" value="Large">
+                  </td>
+                  <td><button type="submit" class="btn btn-primary">Add to <i class="fas fa-shopping-cart"></i></button></td>
+                </form>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tab-pane fade" id="nav-DinnerPlatter" role="tabpanel" aria-labelledby="nav-DinnerPlatter-tab">
+          <table class="table">
+          <thead>
+            <tr>
+              <th>Quantity</th>
+              <th colspan="2"  bgcolor="#F8F9FA">Dinner Platters</th>
+
+              <th class="text-center" scope="col">Small</th>
+              <th class="text-center" scope="col">Large</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in DinnerPlatter %}
+            <tr>
+              <form action="{% url 'cart_add' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="item_cat" value="DinnerPlatter">
+                <input type="hidden" name="item_id" value="{{item.id}}">
+                <td><input type="number" name="quantity" min="1" max="9" value="1"></td>
+                <th scope="row"><img src="media/{{item.image}}" width="50" height="50"></th>
+                <td>{{item.name}}</td>
+                <td class="currency text-center">{{item.price_s}}
+                    <br>
+                    <input class="form-check-input RD_Size" type="radio" name="rd_size_DP_{{item.id}}" id="gridRadios1" value="Small" checked>
+                </td>
+                <td class="currency text-center">{{item.price_l}}
+                    <br>
+                    <input type="hidden" name="size" value="Small" id="rd_size_DP_{{item.id}}">
+                    <input class="form-check-input RD_Size" type="radio" name="rd_size_DP_{{item.id}}" id="gridRadios2" value="Large">
+                </td>
+                <td><button type="submit" class="btn btn-primary">Add to <i class="fas fa-shopping-cart"></i></button></td>
+                </form>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tab-pane fade" id="nav-Pasta" role="tabpanel" aria-labelledby="nav-Pasta-tab">
+        <table class="table">
+        <thead>
+          <tr>
+            <th>Quantity</th>
+            <th colspan="2"  bgcolor="#F8F9FA">Pasta</th>
+
+            <th scope="col">Price</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in Pasta %}
+          <tr>
+            <form action="{% url 'cart_add' %}" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="item_cat" value="Pasta">
+              <input type="hidden" name="item_id" value="{{item.id}}">
+              <td><input type="number" name="quantity" min="1" max="9" value="1"></td>
+              <th scope="row"><img src="media/{{item.image}}" width="50" height="50"></th>
+              <td>{{item.name}}</td>
+              <td class="currency">{{item.price}}</td>
+              <td><button type="submit" class="btn btn-primary">Add to <i class="fas fa-shopping-cart"></i></button></td>
+            </form>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+
+
+      <div class="tab-pane fade" id="nav-Salad" role="tabpanel" aria-labelledby="nav-Salad-tab">
+        <table class="table">
+        <thead>
+          <tr>
+            <th>Quantity</th>
+            <th colspan="2"  bgcolor="#F8F9FA">Salad</th>
+
+            <th scope="col">Price</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in Salad %}
+          <tr>
+            <form action="{% url 'cart_add' %}" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="item_cat" value="Salad">
+              <input type="hidden" name="item_id" value="{{item.id}}">
+              <td><input type="number" name="quantity" min="1" max="9" value="1"></td>
+              <th scope="row"><img src="media/{{item.image}}" width="50" height="50"></th>
+              <td>{{item.name}}</td>
+              <td class="currency">{{item.price}}</td>
+              <td><button type="submit" class="btn btn-primary">Add to <i class="fas fa-shopping-cart"></i></button></td>
+            </form>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+{% endblock %}
